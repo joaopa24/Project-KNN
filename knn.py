@@ -12,7 +12,7 @@ dados = iris.data
 rotulos = iris.target
 
 # embaralhar os dados e dividir entre treino e teste (80/20)
-np.random.seed(0)
+np.random.seed(42)
 indices = np.random.permutation(len(dados))
 tamanho_treino = int(0.8 * len(dados))
 indices_treino = indices[:tamanho_treino]
@@ -87,7 +87,7 @@ for k in [1, 3, 5, 7]:
 
     from sklearn.model_selection import train_test_split
     X_treino_lib, X_teste_lib, y_treino_lib, y_teste_lib = train_test_split(
-        dados, rotulos, test_size=0.2, random_state=0, shuffle=True
+        dados, rotulos, test_size=0.2, random_state=42, shuffle=True
     )
 
     knn = KNeighborsClassifier(n_neighbors=k)
