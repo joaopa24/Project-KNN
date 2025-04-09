@@ -6,29 +6,22 @@ from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.model_selection import train_test_split
 
 iris = load_iris()
 dados = iris.data
 rotulos = iris.target
 
-# embaralhar os dados e dividir entre treino e teste (80/20)
-np.random.seed(42)
-indices = np.random.permutation(len(dados))
-tamanho_treino = int(0.8 * len(dados))
-indices_treino = indices[:tamanho_treino]
-indices_teste = indices[tamanho_treino:]
-
-X_mem = dados[indices_treino]
-y_mem = rotulos[indices_treino]
-X_teste = dados[indices_teste]
-y_teste = rotulos[indices_teste]
+# Usar train_test_split para dividir os dados (80% treino, 20% teste)
+X_mem, X_teste, y_mem, y_teste = train_test_split(
+    dados, rotulos, test_size=0.2, random_state=0, shuffle=True
+)
 
 def calcularDistancia(ponto1, ponto2):
     soma = 0
     for i in range(len(ponto1)):
         soma += (ponto1[i] - ponto2[i]) ** 2
-    distancia = np.sqrt(soma)
-    return distancia
+    return np.sqrt(soma)
 
 def preverPonto(X_mem, y_mem, ponto_novo, k):
     distancias = []
@@ -85,18 +78,13 @@ for k in [1, 3, 5, 7]:
 
     print("\n resultados com libs: ")
 
-    from sklearn.model_selection import train_test_split
-    X_treino_lib, X_teste_lib, y_treino_lib, y_teste_lib = train_test_split(
-        dados, rotulos, test_size=0.2, random_state=42, shuffle=True
-    )
-
     knn = KNeighborsClassifier(n_neighbors=k)
-    knn.fit(X_treino_lib, y_treino_lib)
-    previsoesSklearn = knn.predict(X_teste_lib)
-    acuraciaSklearn = accuracy_score(y_teste_lib, previsoesSklearn)
+    knn.fit(X_mem, y_mem)
+    previsoesSklearn = knn.predict(X_teste)
+    acuraciaSklearn = accuracy_score(y_teste, previsoesSklearn)
     print(f"Acurácia (scikit-learn): {acuraciaSklearn:.2f}")
 
-    relatorioSklearn = classification_report(y_teste_lib, previsoesSklearn, output_dict=True)
+    relatorioSklearn = classification_report(y_teste, previsoesSklearn, output_dict=True)
     for classe in relatorioSklearn:
         if classe in ['0', '1', '2']:
             print(f"Classe {classe}:")
@@ -104,7 +92,7 @@ for k in [1, 3, 5, 7]:
             print(f"  Revocação: {relatorioSklearn[classe]['recall']:.2f}")
     print(f"Acurácia geral: {relatorioSklearn['accuracy']:.2f}")
 
-    matrizSklearn = confusion_matrix(y_teste_lib, previsoesSklearn)
+    matrizSklearn = confusion_matrix(y_teste, previsoesSklearn)
     sns.heatmap(matrizSklearn, annot=True, fmt='d', cmap='Greens')
     plt.title(f'Matriz Confusão k = {k} com libs (train_test_split)')
     plt.xlabel('Classe prevista')
